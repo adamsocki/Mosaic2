@@ -25,7 +25,6 @@ void MyInit() {
 	CreatePlayer();	
 }
 
-
 void MyGameUpdate() {
 
 
