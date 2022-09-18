@@ -22,9 +22,7 @@ void MyInit() {
 	InitializeLevelManager();
 	CreateStars(120, false);
 
-	CreatePlayer();
-
-	
+	CreatePlayer();	
 }
 
 
