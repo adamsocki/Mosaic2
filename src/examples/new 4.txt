@@ -1,0 +1,38 @@
+Why do we have EntityInfo in the EntityManager?
+
+What do we use EntityType_Base for?
+
+How do we utilize and reference generation with the buffer?
+
+So where does tha handle come in?
+
+Obersevations to ask ourselves while we are building a system like this
+The key important thing, is to know why we are building something.
+
+A lot of times starting off, you read a bunch of stuff as to why someone
+did something. so you build that, but not really sure why you are using 
+this thing. What problem is this feature solving?
+
+Always build something as simple as it needs to be for the problem
+you are trying to solve.
+
+As you build something, the individual features that you have are to give you
+a specific thing.
+
+For example, if we talk about this generation, if you don't know why
+we are doing this, one step is to maybe ignore it until you get why you 
+might need it
+
+Drill down to understand what it is specificallyd oing and it can give you that
+info.
+
+The end of the day, the code you write is there to do a specific thing.
+
+
+
+
+Boilerplate code - the template that isn't going to change. That is going to be the same
+between different game engines. 
+
+Choosing an engine is somewhat depending on the tools that are available that you wish to use.
+People tend to choose unreal for it's art tools for example.
