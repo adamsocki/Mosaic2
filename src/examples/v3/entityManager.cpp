@@ -53,8 +53,16 @@ void DeleteEntity(EntityManager* em, EntityHandle handle) {
 		EntityInfo* infoOfSwappedEntity = &em->entities[handleOfSwappedEntity.idLocationInsideInfo];
 		infoOfSwappedEntity->indexInBuffer = info->indexInBuffer;
 	}
-	
-	
+	if (handle.type == EntityType_Star) {
+		Star* starEntity = (Star*)buffer->entities;
+
+		starEntity[info->indexInBuffer] = starEntity[buffer->count - 1];
+		handleOfSwappedEntity = starEntity[buffer->count - 1].handle;
+
+		EntityInfo* infoOfSwappedEntity = &em->entities[handleOfSwappedEntity.idLocationInsideInfo];
+		infoOfSwappedEntity->indexInBuffer = info->indexInBuffer;
+	}
+
 	buffer->count--;
 }
 
@@ -95,6 +103,8 @@ void CreatePlayer() {
 	playerEntity->size = V2(0.7f, 0.3f);
 	playerEntity->sprite = &Data->playerSprite;
 	playerEntity->speed = 4;
+	playerEntity->chargingLaser = false;
+	playerEntity->shootingLaser = false;
 	playerEntity->toDelete = false;
 }
 
@@ -127,6 +137,29 @@ void InitializeEntityBuffers() {
 	starBuffer->sizeInBytes = sizeof(Star);
 	starBuffer->count = 0;
 	starBuffer->entities = (Star*)malloc(starBuffer->capacity * starBuffer->sizeInBytes);
+
+	// enemyBuffer
+	EntityTypeBuffer* enemyBulletBuffer = &Data->em.buffers[EntityType_EnemyBullet];
+	enemyBulletBuffer->capacity = 500;
+	enemyBulletBuffer->sizeInBytes = sizeof(EnemyBullet);
+	enemyBulletBuffer->count = 0;
+	enemyBulletBuffer->entities = (EnemyBullet*)malloc(enemyBulletBuffer->capacity * enemyBulletBuffer->sizeInBytes);
+
+	// PlayerLaserChargeBuffer
+	EntityTypeBuffer* playerLaserChargeBuffer = &Data->em.buffers[EntityType_PlayerLaserCharge];
+	playerLaserChargeBuffer->capacity = 100;
+	playerLaserChargeBuffer->sizeInBytes = sizeof(PlayerLaserCharge);
+	playerLaserChargeBuffer->count = 0;
+	playerLaserChargeBuffer->entities = (PlayerLaserCharge*)malloc(playerLaserChargeBuffer->capacity * playerLaserChargeBuffer->sizeInBytes);
+
+
+	EntityTypeBuffer* playerChargedLaserShotBuffer = &Data->em.buffers[EntityType_PlayerChargedLaserShot];
+	playerChargedLaserShotBuffer->capacity = 100;
+	playerChargedLaserShotBuffer->sizeInBytes = sizeof(PlayerChargedLaserShot);
+	playerChargedLaserShotBuffer->count = 0;
+	playerChargedLaserShotBuffer->entities = (PlayerChargedLaserShot*)malloc(playerChargedLaserShotBuffer->capacity * playerChargedLaserShotBuffer->sizeInBytes);
+
+
 }
 
 void InitializeLevelManager() {
@@ -157,7 +190,7 @@ void CreateStars(int32 numberToCreate, bool playingGame) {
 			starEntity->position = V2(RandfRange(-10, 20), RandfRange(-10, 10));
 		}
 		else {
-			starEntity->position = V2(RandfRange(10, 11), RandfRange(-10, 10));
+			starEntity->position = V2(RandfRange(1, 5), RandfRange(-10, 10));
 		}
 		real32 starSize = RandfRange(.01f, 0.04f);
 		starEntity->size = V2(starSize, starSize);

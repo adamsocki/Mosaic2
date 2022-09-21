@@ -33,7 +33,14 @@ void InputPlayerController(Player* p) {
 	p->position.y += p->speed * speedController.y * Game->deltaTime;
 }
 
+real32 inputTimer = 1;
+bool spaceHeld = false;
+
 void PlayerShootSpaceBarController(Player* p) {
+	
+
+	
+	
 	if (InputPressed(Input, Input_Space)) {
 		EntityHandle playerBulletHandle = AddEntity(&Data->em, EntityType_PlayerBullet);
 		PlayerBullet* playerBulletEntity = (PlayerBullet*)GetEntity(&Data->em, playerBulletHandle);
@@ -45,6 +52,10 @@ void PlayerShootSpaceBarController(Player* p) {
 		playerBulletEntity->size = V2(0.1f, 0.1f);
 		playerBulletEntity->handle = playerBulletHandle;
 	}
+
+
+
+
 
 
 

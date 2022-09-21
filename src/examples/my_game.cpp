@@ -17,6 +17,7 @@ void MyInit() {
 
 	// v3/entityManager.cpp
 	InitializeEntityManager();
+
 	InitializeEntityBuffers();
 
 	InitializeLevelManager();
@@ -114,6 +115,7 @@ void MyGameUpdate() {
 			Rect playerBulletRect;
 			playerBulletRect.max = playerBulletEntity->size;
 			playerBulletRect.min = -playerBulletEntity->size;	
+			//Movement of bullet
 			playerBulletEntity->position.x += playerBulletEntity->speed.x * Game->deltaTime;
 			playerBulletEntity->lifetime += Game->deltaTime;
 			if (playerBulletEntity->lifetime > 2) {
@@ -138,33 +140,12 @@ void MyGameUpdate() {
 	}
 
 	//		Create new stars
-	if (starBuffer->count <= 120) {
-		CreateStars(121 - starBuffer->count, false);
-		/*
-		EntityHandle starHandle = AddEntity(&Data->em, EntityType_Star);
-		Star* starEntity = (Star*)GetEntity(&Data->em, starHandle);
-		starEntity->handle = starHandle;
-		starEntity->position = V2(3, RandfRange(-10, 10));
-		real32 starSize = RandfRange(.01f, 0.04f);
-		starEntity->size = V2(starSize, starSize);
-		starEntity->speed = V2(RandfRange(-5, -1), 0);
-		starEntity->toDelete = false;
-		starEntity->sprite = &Data->starSprite;
-		*/
-	}
+	CreateStars(121 - starBuffer->count, false);
+	
+	//DrawTextScreenPixel(&Game->monoFont, V2(540, 431), 13.0f, RGB(0.5f, 0.5f, 0.5f), "%d", starBuffer->count);
 
 	// RENDER & DELETE
 	ClearColor(RGB(0.0f, 0.0f, 0.0f));
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -174,14 +155,13 @@ void MyGameUpdate() {
 		Star* starEntity = (Star*)GetEntity(&Data->em, starHandle);
 		if (starEntity != NULL) {
 			starEntity->position.x += Game->deltaTime * starEntity->speed.x;
-			if (starEntity->position.x < -12) {
+			if (starEntity->position.x < -10) {
 				starEntity->toDelete = true;
 				//DeleteEntity(&Data->em, starEntity->handle);
 			}
 
 		}
 	}
-
 
 
 

@@ -7,6 +7,11 @@ enum EntityType {
 	EntityType_Enemy,
 
 	EntityType_PlayerBullet,
+	EntityType_EnemyBullet,
+
+	EntityType_PlayerChargedLaserShot,
+	EntityType_PlayerLaserCharge,
+
 	EntityType_Count,
 };
 
@@ -56,7 +61,8 @@ struct Entity {
 
 struct Player : Entity {
 	real32 speed;
-
+	bool chargingLaser;
+	bool shootingLaser;
 };
 
 struct PlayerBullet : Entity {
@@ -74,6 +80,18 @@ struct Enemy : Entity {
 
 struct Star : Entity {
 	vec2 speed;
+};
+
+struct EnemyBullet : Entity {
+	vec2 speed;
+};
+
+struct PlayerLaserCharge : Entity {
+
+};
+
+struct PlayerChargedLaserShot : Entity {
+
 };
 
 
