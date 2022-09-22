@@ -62,7 +62,15 @@ void DeleteEntity(EntityManager* em, EntityHandle handle) {
 		EntityInfo* infoOfSwappedEntity = &em->entities[handleOfSwappedEntity.idLocationInsideInfo];
 		infoOfSwappedEntity->indexInBuffer = info->indexInBuffer;
 	}
+	if (handle.type == EntityType_PlayerLaserCharge) {
+		PlayerLaserCharge* playerLaserChargeEntity = (PlayerLaserCharge*)buffer->entities;
 
+		playerLaserChargeEntity[info->indexInBuffer] = playerLaserChargeEntity[buffer->count - 1];
+		handleOfSwappedEntity = playerLaserChargeEntity[buffer->count - 1].handle;
+
+		EntityInfo* infoOfSwappedEntity = &em->entities[handleOfSwappedEntity.idLocationInsideInfo];
+		infoOfSwappedEntity->indexInBuffer = info->indexInBuffer;
+	}
 	buffer->count--;
 }
 

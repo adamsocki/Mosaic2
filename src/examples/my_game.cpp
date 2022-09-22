@@ -227,6 +227,9 @@ void MyGameUpdate() {
 		EntityHandle playerLaserChargeHandle = playerLaserChargeEntitiesInBuffer[i].handle;
 		PlayerLaserCharge* playerLaserChargeEntity = (PlayerLaserCharge*)GetEntity(&Data->em, playerLaserChargeHandle);
 		if (playerLaserChargeEntity != NULL) {
+			if (playerLaserChargeEntity->toDelete) {
+				DeleteEntity(&Data->em, playerLaserChargeEntity->handle);
+			}
 			DrawSprite(playerLaserChargeEntity->position, playerLaserChargeEntity->size, playerLaserChargeEntity->sprite);
 		}
 	}

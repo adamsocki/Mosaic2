@@ -48,7 +48,8 @@ void PlayerShootSpaceBarController(Player* p) {
 			playerLaserChargeEntity->strength = 0.002f;
 			playerLaserChargeEntity->sprite = &Data->playerLaserChargeSprite;
 			playerLaserChargeEntity->size = V2(0.5f, 0.5f);
-			playerLaserChargeEntity->growthRate = 1;
+			playerLaserChargeEntity->growthRate = 0.001f;
+			playerLaserChargeEntity->toDelete = false;
 			Data->spacebarHeld = true;
 			p->chargingLaser = true;
 			p->chargingLaserHandle = playerLaserChargeHandle;
@@ -69,6 +70,8 @@ void PlayerShootSpaceBarController(Player* p) {
 
 	if (InputReleased(Input, Input_Space)) {
 		if (Data->spacebarHeld) {
+			PlayerLaserCharge* playerLaserChargeEntity = (PlayerLaserCharge*)GetEntity(&Data->em, p->chargingLaserHandle);
+			playerLaserChargeEntity->toDelete = true;
 			Data->spacebarHeld = false;
 			p->chargingLaser = false;
 		}
