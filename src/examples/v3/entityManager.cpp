@@ -62,6 +62,15 @@ void DeleteEntity(EntityManager* em, EntityHandle handle) {
 		EntityInfo* infoOfSwappedEntity = &em->entities[handleOfSwappedEntity.idLocationInsideInfo];
 		infoOfSwappedEntity->indexInBuffer = info->indexInBuffer;
 	}
+	if (handle.type == EntityType_Star) {
+		Star* starEntity = (Star*)buffer->entities;
+
+		starEntity[info->indexInBuffer] = starEntity[buffer->count - 1];
+		handleOfSwappedEntity = starEntity[buffer->count - 1].handle;
+
+		EntityInfo* infoOfSwappedEntity = &em->entities[handleOfSwappedEntity.idLocationInsideInfo];
+		infoOfSwappedEntity->indexInBuffer = info->indexInBuffer;
+	}
 
 	buffer->count--;
 }
@@ -151,14 +160,16 @@ void InitializeEntityBuffers() {
 	playerLaserChargeBuffer->sizeInBytes = sizeof(PlayerLaserCharge);
 	playerLaserChargeBuffer->count = 0;
 	playerLaserChargeBuffer->entities = (PlayerLaserCharge*)malloc(playerLaserChargeBuffer->capacity * playerLaserChargeBuffer->sizeInBytes);
+	memset(playerLaserChargeBuffer->entities, 0, sizeof(EntityTypeBuffer) * playerLaserChargeBuffer->capacity);
 
 
+	/*
 	EntityTypeBuffer* playerChargedLaserShotBuffer = &Data->em.buffers[EntityType_PlayerChargedLaserShot];
 	playerChargedLaserShotBuffer->capacity = 100;
 	playerChargedLaserShotBuffer->sizeInBytes = sizeof(PlayerChargedLaserShot);
 	playerChargedLaserShotBuffer->count = 0;
 	playerChargedLaserShotBuffer->entities = (PlayerChargedLaserShot*)malloc(playerChargedLaserShotBuffer->capacity * playerChargedLaserShotBuffer->sizeInBytes);
-
+	*/
 
 }
 

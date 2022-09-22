@@ -63,6 +63,8 @@ struct Player : Entity {
 	real32 speed;
 	bool chargingLaser;
 	bool shootingLaser;
+
+	EntityHandle currentLaserChargeHandle;
 };
 
 struct PlayerBullet : Entity {
@@ -87,7 +89,8 @@ struct EnemyBullet : Entity {
 };
 
 struct PlayerLaserCharge : Entity {
-
+	real32 strength;
+	real32 growthRate;
 };
 
 struct PlayerChargedLaserShot : Entity {
@@ -120,6 +123,8 @@ struct MyData {
 	Sprite enemySprite6;
 	Sprite enemySprite7;
 	Sprite enemySprite8;
+
+	Sprite playerLaserChargeSprite;
 
 	Sprite starSprite;
 

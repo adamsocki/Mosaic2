@@ -33,11 +33,35 @@ void InputPlayerController(Player* p) {
 	p->position.y += p->speed * speedController.y * Game->deltaTime;
 }
 
-real32 inputTimer = 1;
-bool spaceHeld = false;
 
-void PlayerShootSpaceBarController(Player* p) {
+
+void PlayerShootSpaceBarController(Player* p, bool spaceHeld, int32 inputTimer) {
 	
+	if (InputHeldSeconds(Input, Input_Space, inputTimer)) {
+		if (!spaceHeld) {
+			EntityHandle playerLaserChargeHandle = AddEntity(&Data->em, EntityType_PlayerLaserCharge);
+			PlayerLaserCharge* playerLaserChargeEntity = (PlayerLaserCharge*)GetEntity(&Data->em, playerLaserChargeHandle);
+			p->currentLaserChargeHandle = playerLaserChargeHandle;
+			playerLaserChargeEntity->toDelete = false;
+			playerLaserChargeEntity->position = p->position;
+			playerLaserChargeEntity->size = V2(0.5f, 0.5f);
+			playerLaserChargeEntity->strength = 0.002f;
+			playerLaserChargeEntity->growthRate = 1;
+			playerLaserChargeEntity->sprite = &Data->playerLaserChargeSprite;
+			spaceHeld = true;
+			p->chargingLaser = true;
+		}
+		else {
+			EntityHandle playerLaserChargeHandle = p->currentLaserChargeHandle;
+			PlayerLaserCharge* playerLaserChargeEntity = (PlayerLaserCharge*)GetEntity(&Data->em, playerLaserChargeHandle);
+			playerLaserChargeEntity->strength += Game->deltaTime * playerLaserChargeEntity->growthRate;
+			if (playerLaserChargeEntity->size.x < 3) {
+				playerLaserChargeEntity->size.x += playerLaserChargeEntity->strength;
+				playerLaserChargeEntity->size.y += playerLaserChargeEntity->strength;
+
+			}
+		}
+	}
 
 	
 	
@@ -52,11 +76,5 @@ void PlayerShootSpaceBarController(Player* p) {
 		playerBulletEntity->size = V2(0.1f, 0.1f);
 		playerBulletEntity->handle = playerBulletHandle;
 	}
-
-
-
-
-
-
 
 }

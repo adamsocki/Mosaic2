@@ -25,7 +25,8 @@ void MyInit() {
 
 	CreatePlayer();	
 }
-
+real32 inputTimer = 1;
+bool spaceHeld = false;
 
 void MyGameUpdate() {
 
@@ -44,16 +45,18 @@ void MyGameUpdate() {
 	EntityTypeBuffer* enemyBuffer = &Data->em.buffers[EntityType_Enemy];
 	EntityTypeBuffer* playerBulletBuffer = &Data->em.buffers[EntityType_PlayerBullet];
 	EntityTypeBuffer* starBuffer = &Data->em.buffers[EntityType_Star];
+	EntityTypeBuffer* playerLaserChargeBuffer = &Data->em.buffers[EntityType_PlayerLaserCharge];
 
 	//		Point to EntityBuffer->entities
 	Player* playerEntitiesInBuffer = (Player*)playerBuffer->entities;
 	Enemy* enemyEntitiesInBuffer = (Enemy*)enemyBuffer->entities;
 	PlayerBullet* playerBulletEntitiesInBuffer = (PlayerBullet*)playerBulletBuffer->entities;
 	Star* starEntitiesInBuffer = (Star*)starBuffer->entities;
+	PlayerLaserCharge* playerLaserChargeEntitiesInBuffer = (PlayerLaserCharge*)playerLaserChargeBuffer->entities;
 
 	//		Input Logic
 	InputPlayerController(&playerEntitiesInBuffer[0]);
-	PlayerShootSpaceBarController(&playerEntitiesInBuffer[0]);
+	PlayerShootSpaceBarController(&playerEntitiesInBuffer[0], spaceHeld, inputTimer);
 
 	//		Spawn Enemies - Level Timer Check
 	if (Data->lm.spawnEnemies) {
@@ -139,6 +142,15 @@ void MyGameUpdate() {
 		}
 	}
 
+	if (playerEntitiesInBuffer[0].chargingLaser) {
+		for (int i = 0; i < playerLaserChargeBuffer->count; i++) {
+			EntityHandle playerLaserChargeHandle = playerEntitiesInBuffer[0].currentLaserChargeHandle;
+			PlayerLaserCharge* playerLaserChargeEntity = (PlayerLaserCharge*)GetEntity(&Data->em, playerLaserChargeHandle);
+			playerLaserChargeEntity->position = playerEntitiesInBuffer[0].position + V2(0, 2);
+		}
+
+	}
+
 	//		Create new stars
 	CreateStars(121 - starBuffer->count, false);
 	
@@ -216,6 +228,19 @@ void MyGameUpdate() {
 			}
 		}
 	} 
+
+	for (int i = 0; i < playerLaserChargeBuffer->count; i++) {
+		EntityHandle playerLaserChargeHandle = playerLaserChargeEntitiesInBuffer[i].handle;
+		PlayerLaserCharge* playerLaserChargeEntity = (PlayerLaserCharge*)GetEntity(&Data->em, playerLaserChargeHandle);
+		if (playerLaserChargeEntity != NULL) {
+			if (playerLaserChargeEntity->toDelete) {
+				DeleteEntity(&Data->em, playerLaserChargeEntity->handle);
+			}
+			else {
+				DrawSprite(playerLaserChargeEntity->position, playerLaserChargeEntity->size, playerLaserChargeEntity->sprite);
+			}
+		}
+	}
 
 	
 }
