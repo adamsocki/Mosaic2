@@ -12,6 +12,9 @@ void MyInit() {
 
 	Data = (MyData*)Game->myData;
 
+
+	Data->spacebarHeld = false;
+	Data->inputTimer = 1;
 	// v3/structs.cpp
 	LoadSprites();
 
@@ -44,12 +47,14 @@ void MyGameUpdate() {
 	EntityTypeBuffer* enemyBuffer = &Data->em.buffers[EntityType_Enemy];
 	EntityTypeBuffer* playerBulletBuffer = &Data->em.buffers[EntityType_PlayerBullet];
 	EntityTypeBuffer* starBuffer = &Data->em.buffers[EntityType_Star];
+	EntityTypeBuffer* playerLaserChargeBuffer = &Data->em.buffers[EntityType_PlayerLaserCharge];
 
 	//		Point to EntityBuffer->entities
 	Player* playerEntitiesInBuffer = (Player*)playerBuffer->entities;
 	Enemy* enemyEntitiesInBuffer = (Enemy*)enemyBuffer->entities;
 	PlayerBullet* playerBulletEntitiesInBuffer = (PlayerBullet*)playerBulletBuffer->entities;
 	Star* starEntitiesInBuffer = (Star*)starBuffer->entities;
+	PlayerLaserCharge* playerLaserChargeEntitiesInBuffer = (PlayerLaserCharge*)playerLaserChargeBuffer->entities;
 
 	//		Input Logic
 	InputPlayerController(&playerEntitiesInBuffer[0]);
@@ -217,5 +222,13 @@ void MyGameUpdate() {
 		}
 	} 
 
+
+	for (int i = 0; i < playerLaserChargeBuffer->count; i++) {
+		EntityHandle playerLaserChargeHandle = playerLaserChargeEntitiesInBuffer[i].handle;
+		PlayerLaserCharge* playerLaserChargeEntity = (PlayerLaserCharge*)GetEntity(&Data->em, playerLaserChargeHandle);
+		if (playerLaserChargeEntity != NULL) {
+			DrawSprite(playerLaserChargeEntity->position, playerLaserChargeEntity->size, playerLaserChargeEntity->sprite);
+		}
+	}
 	
 }

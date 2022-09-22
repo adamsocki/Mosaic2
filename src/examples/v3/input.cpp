@@ -33,14 +33,48 @@ void InputPlayerController(Player* p) {
 	p->position.y += p->speed * speedController.y * Game->deltaTime;
 }
 
-real32 inputTimer = 1;
-bool spaceHeld = false;
+
 
 void PlayerShootSpaceBarController(Player* p) {
 	
+	if (InputHeldSeconds(Input, Input_Space, Data->inputTimer)) {
+		if (!Data->spacebarHeld) {
+			EntityHandle playerLaserChargeHandle = AddEntity(&Data->em, EntityType_PlayerLaserCharge);
+			PlayerLaserCharge* playerLaserChargeEntity = (PlayerLaserCharge*)GetEntity(&Data->em, playerLaserChargeHandle);
+			vec2 laserChargePositionRelativeToPlayer = p->position;
+			laserChargePositionRelativeToPlayer.x += 2;
+			playerLaserChargeEntity->position = laserChargePositionRelativeToPlayer;
+			playerLaserChargeEntity->handle = playerLaserChargeHandle;
+			playerLaserChargeEntity->strength = 0.002f;
+			playerLaserChargeEntity->sprite = &Data->playerLaserChargeSprite;
+			playerLaserChargeEntity->size = V2(0.5f, 0.5f);
+			playerLaserChargeEntity->growthRate = 1;
+			Data->spacebarHeld = true;
+			p->chargingLaser = true;
+			p->chargingLaserHandle = playerLaserChargeHandle;
+		}
+		else {
+			PlayerLaserCharge* playerLaserChargeEntity = (PlayerLaserCharge*)GetEntity(&Data->em, p->chargingLaserHandle);
+			playerLaserChargeEntity->strength += Game->deltaTime * playerLaserChargeEntity->growthRate;
+			vec2 laserChargePositionRelativeToPlayer = p->position;
+			laserChargePositionRelativeToPlayer.x += 2;
+			playerLaserChargeEntity->position = laserChargePositionRelativeToPlayer;
+			if (playerLaserChargeEntity->size.x < 3) {
+				playerLaserChargeEntity->size.x += playerLaserChargeEntity->strength;
+				playerLaserChargeEntity->size.y += playerLaserChargeEntity->strength;
+			}
+		}
+		
+	}
 
-	
-	
+	if (InputReleased(Input, Input_Space)) {
+		if (Data->spacebarHeld) {
+			Data->spacebarHeld = false;
+			p->chargingLaser = false;
+		}
+	}
+
+		
 	if (InputPressed(Input, Input_Space)) {
 		EntityHandle playerBulletHandle = AddEntity(&Data->em, EntityType_PlayerBullet);
 		PlayerBullet* playerBulletEntity = (PlayerBullet*)GetEntity(&Data->em, playerBulletHandle);
@@ -52,11 +86,5 @@ void PlayerShootSpaceBarController(Player* p) {
 		playerBulletEntity->size = V2(0.1f, 0.1f);
 		playerBulletEntity->handle = playerBulletHandle;
 	}
-
-
-
-
-
-
 
 }
