@@ -74,7 +74,24 @@ void PlayerShootSpaceBarController(Player* p) {
 			playerLaserChargeEntity->toDelete = true;
 			Data->spacebarHeld = false;
 			p->chargingLaser = false;
+
+			// create laser
+			p->shootingLaser = true;
+			EntityHandle playerLaserShotHandle = AddEntity(&Data->em, EntityType_PlayerLaserShot);
+			PlayerLaserShot* playerLaserShotEntity = (PlayerLaserShot*)GetEntity(&Data->em, playerLaserShotHandle);
+
+			playerLaserShotEntity->size = V2(11, 0.5f);
+			playerLaserShotEntity->position = p->position + V2(1 + (playerLaserShotEntity->size.x/2 ), 0);
+			playerLaserShotEntity->sprite = &Data->playerLaserShotSprite;
+			playerLaserShotEntity->lifetime = 0;
+			//playerLaserShotEntity->size = V2(7, 1);
+			playerLaserShotEntity->toDelete = false;
+			playerLaserShotEntity->handle = playerLaserShotHandle;
+			p->playerLaserShotHandle = playerLaserShotHandle;
+			//p->playerLaser
 		}
+
+		
 	}
 
 		

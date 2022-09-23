@@ -160,6 +160,25 @@ void InitializeEntityBuffers() {
 	playerLaserChargeBuffer->count = 0;
 	playerLaserChargeBuffer->entities = (PlayerLaserCharge*)malloc(playerLaserChargeBuffer->capacity * playerLaserChargeBuffer->sizeInBytes);
 
+	// PlayerLaserShotBuffer
+	EntityTypeBuffer* playerLaserShotBuffer = &Data->em.buffers[EntityType_PlayerLaserShot];
+	playerLaserShotBuffer->capacity = 100;
+	playerLaserShotBuffer->sizeInBytes = sizeof(PlayerLaserShot);
+	playerLaserShotBuffer->count = 0;
+	playerLaserShotBuffer->entities = (PlayerLaserShot*)malloc(playerLaserShotBuffer->capacity * playerLaserShotBuffer->sizeInBytes);
+
+	// BaseBuffer
+	EntityTypeBuffer* baseBuffer = &Data->em.buffers[EntityType_Base];
+	baseBuffer->capacity = 10;
+	baseBuffer->sizeInBytes = sizeof(PlayerLaserShot);
+	baseBuffer->count = 0;
+	baseBuffer->entities = (PlayerLaserShot*)malloc(baseBuffer->capacity * baseBuffer->sizeInBytes);
+}
+
+void CreateBase() {
+	EntityHandle killCountHandle = AddEntity(&Data->em, EntityType_Base);
+	Base* killCountEntity = (Base*)GetEntity(&Data->em, killCountHandle);
+	killCountEntity->valueToDisplay = 0;
 }
 
 void InitializeLevelManager() {
