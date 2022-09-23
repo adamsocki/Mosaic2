@@ -84,16 +84,11 @@ void PlayerShootSpaceBarController(Player* p) {
 			playerLaserShotEntity->position = p->position + V2(1 + (playerLaserShotEntity->size.x/2 ), 0);
 			playerLaserShotEntity->sprite = &Data->playerLaserShotSprite;
 			playerLaserShotEntity->lifetime = 0;
-			//playerLaserShotEntity->size = V2(7, 1);
 			playerLaserShotEntity->toDelete = false;
 			playerLaserShotEntity->handle = playerLaserShotHandle;
 			p->playerLaserShotHandle = playerLaserShotHandle;
-			//p->playerLaser
-		}
-
-		
+		}		
 	}
-
 		
 	if (InputPressed(Input, Input_Space)) {
 		EntityHandle playerBulletHandle = AddEntity(&Data->em, EntityType_PlayerBullet);
@@ -106,5 +101,4 @@ void PlayerShootSpaceBarController(Player* p) {
 		playerBulletEntity->size = V2(0.1f, 0.1f);
 		playerBulletEntity->handle = playerBulletHandle;
 	}
-
 }
