@@ -9,8 +9,12 @@ enum EntityType {
 	EntityType_PlayerBullet,
 	EntityType_EnemyBullet,
 
-	EntityType_PlayerChargedLaserShot,
 	EntityType_PlayerLaserCharge,
+	EntityType_PlayerLaserShot,
+
+	EntityType_ShotBar,
+
+	EntityType_KillCount,
 
 	EntityType_Count,
 };
@@ -58,11 +62,19 @@ struct Entity {
 	EntityHandle handle;
 };
 
+struct Base : Entity {
+	int32 valueToDisplay;
+	//string valueToWrite;
+};
 
 struct Player : Entity {
 	real32 speed;
+
 	bool chargingLaser;
 	bool shootingLaser;
+
+	EntityHandle chargingLaserHandle;
+	EntityHandle playerLaserShotHandle;
 };
 
 struct PlayerBullet : Entity {
@@ -87,12 +99,15 @@ struct EnemyBullet : Entity {
 };
 
 struct PlayerLaserCharge : Entity {
-
+	real32 strength;
+	real32 growthRate;
 };
 
-struct PlayerChargedLaserShot : Entity {
-
+struct PlayerLaserShot : Entity {
+	real32 lifetime;
+	real32 strength;
 };
+
 
 
 struct LevelManager {
@@ -112,6 +127,9 @@ struct MyData {
 	//Sprite enemySprite;
 	Sprite playerBulletSprite;
 
+	Sprite playerLaserShotSprite;
+	Sprite playerLaserChargeSprite;
+
 	Sprite enemySprite1;
 	Sprite enemySprite2;
 	Sprite enemySprite3;
@@ -124,4 +142,9 @@ struct MyData {
 	Sprite starSprite;
 
 	LevelManager lm;
+
+	bool spacebarHeld;
+	real32 inputTimer;
+
+	int32 killCount;
 };

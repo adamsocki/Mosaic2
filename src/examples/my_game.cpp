@@ -12,6 +12,10 @@ void MyInit() {
 
 	Data = (MyData*)Game->myData;
 
+
+	Data->spacebarHeld = false;
+	Data->inputTimer = 1;
+	Data->killCount = 0;
 	// v3/structs.cpp
 	LoadSprites();
 
@@ -24,6 +28,7 @@ void MyInit() {
 	CreateStars(120, false);
 
 	CreatePlayer();	
+	CreateBase();
 }
 
 
@@ -33,7 +38,7 @@ void MyGameUpdate() {
 	// LOGIC
 	//		Level Logic
 	Data->lm.spawnEnemyTimer += Game->deltaTime;
-	if (Data->lm.spawnEnemyTimer > 3) {
+	if (Data->lm.spawnEnemyTimer > 2.5f) {
 		Data->lm.spawnEnemyTimer = 0;
 		Data->lm.spawnEnemies = true;
 		Data->lm.spawnEnemyGenerations++;
@@ -44,12 +49,18 @@ void MyGameUpdate() {
 	EntityTypeBuffer* enemyBuffer = &Data->em.buffers[EntityType_Enemy];
 	EntityTypeBuffer* playerBulletBuffer = &Data->em.buffers[EntityType_PlayerBullet];
 	EntityTypeBuffer* starBuffer = &Data->em.buffers[EntityType_Star];
+	EntityTypeBuffer* playerLaserChargeBuffer = &Data->em.buffers[EntityType_PlayerLaserCharge];
+	EntityTypeBuffer* playerLaserShotBuffer = &Data->em.buffers[EntityType_PlayerLaserShot];
+	EntityTypeBuffer* baseBuffer = &Data->em.buffers[EntityType_Base];
 
 	//		Point to EntityBuffer->entities
 	Player* playerEntitiesInBuffer = (Player*)playerBuffer->entities;
 	Enemy* enemyEntitiesInBuffer = (Enemy*)enemyBuffer->entities;
 	PlayerBullet* playerBulletEntitiesInBuffer = (PlayerBullet*)playerBulletBuffer->entities;
 	Star* starEntitiesInBuffer = (Star*)starBuffer->entities;
+	PlayerLaserCharge* playerLaserChargeEntitiesInBuffer = (PlayerLaserCharge*)playerLaserChargeBuffer->entities;
+	PlayerLaserShot* playerLaserShotEntitiesInBuffer = (PlayerLaserShot*)playerLaserShotBuffer->entities;
+	Base* baseEntitiesInBuffer = (Base*)baseBuffer->entities;
 
 	//		Input Logic
 	InputPlayerController(&playerEntitiesInBuffer[0]);
@@ -57,14 +68,14 @@ void MyGameUpdate() {
 
 	//		Spawn Enemies - Level Timer Check
 	if (Data->lm.spawnEnemies) {
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 6; i++) {
 			EntityHandle enemyHandle = AddEntity(&Data->em, EntityType_Enemy);
 			Enemy* enemyEntity = (Enemy*)GetEntity(&Data->em, enemyHandle);
-			enemyEntity->position = V2(4, 1 + i);
+			enemyEntity->position = V2(7, -4 + i * RandfRange(0.1f, 3) );
 			enemyEntity->size = V2(0.2f, 0.2f);
 			enemyEntity->handle = enemyHandle;
 			enemyEntity->toDelete = false;
-			enemyEntity->speed = V2(-1, 0);
+			enemyEntity->speed = V2(RandfRange(-3, -0.5f), 0);
 			int32 random = RandiRange(1, 8);
 			if (random == 1) {
 				enemyEntity->sprite = &Data->enemySprite1;
@@ -105,6 +116,41 @@ void MyGameUpdate() {
 		}
 	}
 
+	//		Move Player Laser
+	if (playerEntitiesInBuffer[0].shootingLaser) {
+		for (int i = 0; i < playerLaserShotBuffer->count; i++) {
+			PlayerLaserShot* playerLaserShotEntity = (PlayerLaserShot*)GetEntity(&Data->em, playerEntitiesInBuffer[0].playerLaserShotHandle);
+			playerLaserShotEntity->position = playerEntitiesInBuffer[0].position + V2(1+(playerLaserShotEntity->size.x), 0);
+			playerLaserShotEntity->lifetime += Game->deltaTime;
+
+			if (playerLaserShotEntity->lifetime > 2) {
+				playerLaserShotEntity->toDelete = true;
+			}
+
+			// Collision detection to enemy
+			Rect playerLaserShotRect;
+			playerLaserShotRect.max = playerLaserShotEntity->size - V2(0, 0.5f);
+			playerLaserShotRect.min = -playerLaserShotEntity->size + V2(0, 0.5f);
+
+			for (int j = 0; j < enemyBuffer->count; j++) {
+				EntityHandle enemyHandle = enemyEntitiesInBuffer[j].handle;
+				Enemy* enemyEntity = (Enemy*)GetEntity(&Data->em, enemyHandle);
+				if (enemyEntity != NULL) {
+					Rect enemyRect;
+					enemyRect.max = enemyEntity->size;
+					enemyRect.min = -enemyEntity->size;
+					vec2 dir = V2(0);
+					if (RectTest(enemyRect, playerLaserShotRect, enemyEntity->position, playerLaserShotEntity->position, &dir)) {
+						//playerLaserShotEntity->toDelete = true;
+						enemyEntity->toDelete = true;
+						Data->killCount++;
+					}
+				}
+			}
+
+		}
+	}
+
 	//		Move Player Bullets
 	for (int i = 0; i < playerBulletBuffer->count; i++) {
 		
@@ -127,12 +173,13 @@ void MyGameUpdate() {
 				Enemy* enemyEntity = (Enemy*)GetEntity(&Data->em, enemyHandle);
 				if (enemyEntity != NULL) {
 					Rect enemyRect;
-					enemyRect.max = enemyEntity->size;
-					enemyRect.min = -enemyEntity->size;
+					enemyRect.max = enemyEntity->size - V2(0.1f,0.1f);
+					enemyRect.min = -enemyEntity->size + V2(0.1f, 0.1f);
 					vec2 dir = V2(0);
 					if (RectTest(enemyRect, playerBulletRect, enemyEntity->position, playerBulletEntity->position, &dir)) {
 						playerBulletEntity->toDelete = true;
 						enemyEntity->toDelete = true;
+						Data->killCount++;
 					}
 				}
 			}
@@ -142,7 +189,7 @@ void MyGameUpdate() {
 	//		Create new stars
 	CreateStars(121 - starBuffer->count, false);
 	
-	//DrawTextScreenPixel(&Game->monoFont, V2(540, 431), 13.0f, RGB(0.5f, 0.5f, 0.5f), "%d", starBuffer->count);
+	
 
 	// RENDER & DELETE
 	ClearColor(RGB(0.0f, 0.0f, 0.0f));
@@ -157,9 +204,7 @@ void MyGameUpdate() {
 			starEntity->position.x += Game->deltaTime * starEntity->speed.x;
 			if (starEntity->position.x < -10) {
 				starEntity->toDelete = true;
-				//DeleteEntity(&Data->em, starEntity->handle);
 			}
-
 		}
 	}
 
@@ -217,5 +262,38 @@ void MyGameUpdate() {
 		}
 	} 
 
+	if (playerEntitiesInBuffer[0].chargingLaser) {
+		for (int i = 0; i < playerLaserChargeBuffer->count; i++) {
+			EntityHandle playerLaserChargeHandle = playerLaserChargeEntitiesInBuffer[i].handle;
+			PlayerLaserCharge* playerLaserChargeEntity = (PlayerLaserCharge*)GetEntity(&Data->em, playerLaserChargeHandle);
+			if (playerLaserChargeEntity != NULL) {
+				if (playerLaserChargeEntity->toDelete) {
+					DeleteEntity(&Data->em, playerLaserChargeEntity->handle);
+				}
+				else {
+					DrawTextScreenPixel(&Game->monoFont, V2(30, 80), 13.0f, RGB(0.1f, 0.1f, 0.99f), "Laser Charge: %2f", playerLaserChargeEntity->size.x / 3);
+					DrawSprite(playerLaserChargeEntity->position, playerLaserChargeEntity->size, playerLaserChargeEntity->sprite);
+				}
+			}
+		}
+	}
+
+	if (playerEntitiesInBuffer[0].shootingLaser) {
+		for (int i = 0; i < playerLaserShotBuffer->count; i++) {
+			EntityHandle playerLaserShotHandle = playerLaserShotEntitiesInBuffer[i].handle;
+			PlayerLaserCharge* playerLaserShotEntity = (PlayerLaserCharge*)GetEntity(&Data->em, playerLaserShotHandle);
+			if (playerLaserShotEntity != NULL) {
+				if (playerLaserShotEntity->toDelete) {
+					DeleteEntity(&Data->em, playerLaserShotEntity->handle);
+				}
+				else {
+					DrawSprite(playerLaserShotEntity->position, playerLaserShotEntity->size, playerLaserShotEntity->sprite);
+				}
+				
+			}
+		}
+	}
+
+	DrawTextScreenPixel(&Game->monoFont, V2(30,50), 13.0f, RGB(0.8f, 0.1f, 0.1f), "Kill Count: %d", Data->killCount);
 	
 }

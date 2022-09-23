@@ -62,7 +62,15 @@ void DeleteEntity(EntityManager* em, EntityHandle handle) {
 		EntityInfo* infoOfSwappedEntity = &em->entities[handleOfSwappedEntity.idLocationInsideInfo];
 		infoOfSwappedEntity->indexInBuffer = info->indexInBuffer;
 	}
+	if (handle.type == EntityType_PlayerLaserCharge) {
+		PlayerLaserCharge* playerLaserChargeEntity = (PlayerLaserCharge*)buffer->entities;
 
+		playerLaserChargeEntity[info->indexInBuffer] = playerLaserChargeEntity[buffer->count - 1];
+		handleOfSwappedEntity = playerLaserChargeEntity[buffer->count - 1].handle;
+
+		EntityInfo* infoOfSwappedEntity = &em->entities[handleOfSwappedEntity.idLocationInsideInfo];
+		infoOfSwappedEntity->indexInBuffer = info->indexInBuffer;
+	}
 	buffer->count--;
 }
 
@@ -152,14 +160,25 @@ void InitializeEntityBuffers() {
 	playerLaserChargeBuffer->count = 0;
 	playerLaserChargeBuffer->entities = (PlayerLaserCharge*)malloc(playerLaserChargeBuffer->capacity * playerLaserChargeBuffer->sizeInBytes);
 
+	// PlayerLaserShotBuffer
+	EntityTypeBuffer* playerLaserShotBuffer = &Data->em.buffers[EntityType_PlayerLaserShot];
+	playerLaserShotBuffer->capacity = 100;
+	playerLaserShotBuffer->sizeInBytes = sizeof(PlayerLaserShot);
+	playerLaserShotBuffer->count = 0;
+	playerLaserShotBuffer->entities = (PlayerLaserShot*)malloc(playerLaserShotBuffer->capacity * playerLaserShotBuffer->sizeInBytes);
 
-	EntityTypeBuffer* playerChargedLaserShotBuffer = &Data->em.buffers[EntityType_PlayerChargedLaserShot];
-	playerChargedLaserShotBuffer->capacity = 100;
-	playerChargedLaserShotBuffer->sizeInBytes = sizeof(PlayerChargedLaserShot);
-	playerChargedLaserShotBuffer->count = 0;
-	playerChargedLaserShotBuffer->entities = (PlayerChargedLaserShot*)malloc(playerChargedLaserShotBuffer->capacity * playerChargedLaserShotBuffer->sizeInBytes);
+	// BaseBuffer
+	EntityTypeBuffer* baseBuffer = &Data->em.buffers[EntityType_Base];
+	baseBuffer->capacity = 10;
+	baseBuffer->sizeInBytes = sizeof(PlayerLaserShot);
+	baseBuffer->count = 0;
+	baseBuffer->entities = (PlayerLaserShot*)malloc(baseBuffer->capacity * baseBuffer->sizeInBytes);
+}
 
-
+void CreateBase() {
+	EntityHandle killCountHandle = AddEntity(&Data->em, EntityType_Base);
+	Base* killCountEntity = (Base*)GetEntity(&Data->em, killCountHandle);
+	killCountEntity->valueToDisplay = 0;
 }
 
 void InitializeLevelManager() {
@@ -177,6 +196,7 @@ void InitializeEntityManager() {
 	Data->em.entities = (EntityInfo*)malloc(sizeof(EntityInfo) * Data->em.totalEntityManagerCapacity);
 	memset(Data->em.entities, 0, sizeof(EntityInfo) * Data->em.totalEntityManagerCapacity);
 	Data->em.nextID = 0;
+
 }
 
 
