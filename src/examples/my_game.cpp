@@ -16,6 +16,9 @@ void MyInit() {
 	Data->spacebarHeld = false;
 	Data->inputTimer = 1;
 	Data->killCount = 0;
+	Data->gameOver = false;
+	Data->gameOverTimer;
+	Data->playerGameOverPosition; 
 	// v3/structs.cpp
 	LoadSprites();
 
@@ -64,8 +67,11 @@ void MyGameUpdate() {
 	EnemyBullet* enemyBulletEntitiesInBuffer = (EnemyBullet*)enemyBulletBuffer->entities;
 
 	//		Input Logic
-	InputPlayerController(&playerEntitiesInBuffer[0]);
-	PlayerShootSpaceBarController(&playerEntitiesInBuffer[0]);
+
+	if (!Data->gameOver) {
+		InputPlayerController(&playerEntitiesInBuffer[0]);
+		PlayerShootSpaceBarController(&playerEntitiesInBuffer[0]);
+	}	
 
 	//		Spawn Enemies - Level Timer Check
 	if (Data->lm.spawnEnemies) {
@@ -141,6 +147,19 @@ void MyGameUpdate() {
 		if (enemyBulletEntity->lifetime > 3) {
 			enemyBulletEntity->toDelete = true;
 		}
+		//		EnemyBullet Player Collision Detection
+		Rect playerRect;
+		playerRect.max = playerEntitiesInBuffer[0].size;
+		playerRect.min = -playerEntitiesInBuffer[0].size;
+		Rect enemyBulletRect;
+		enemyBulletRect.max = enemyBulletEntity->size;
+		enemyBulletRect.min = -enemyBulletEntity->size;
+		vec2 dir = V2(0);
+		if (RectTest(enemyBulletRect, playerRect, enemyBulletEntity->position, playerEntitiesInBuffer[0].position, &dir)) {
+			playerEntitiesInBuffer[0].toDelete = true;
+			Data->gameOver = true;
+		}
+
 	}
 
 	//		Move Player Laser
@@ -174,7 +193,6 @@ void MyGameUpdate() {
 					}
 				}
 			}
-
 		}
 	}
 
@@ -216,14 +234,11 @@ void MyGameUpdate() {
 	//		Create new stars
 	CreateStars(121 - starBuffer->count, false);
 	
-	
 
 	// RENDER & DELETE
 	ClearColor(RGB(0.0f, 0.0f, 0.0f));
 
-
-
-	//		Star Render (andMover)
+	//		Star Mover
 	for (int i = 0; i < starBuffer->count; i++) {
 		EntityHandle starHandle = starEntitiesInBuffer[i].handle;
 		Star* starEntity = (Star*)GetEntity(&Data->em, starHandle);
@@ -235,20 +250,17 @@ void MyGameUpdate() {
 		}
 	}
 
-
-
+	//		Star Render
 	for (int i = 0; i < starBuffer->count; i++) {
 		EntityHandle starHandle = starEntitiesInBuffer[i].handle;
 		Star* starEntity = (Star*)GetEntity(&Data->em, starHandle);
 		if (starEntity != NULL) {
-			
 			if (starEntity->toDelete) {
 				DeleteEntity(&Data->em, starEntity->handle);
 			}
 			else {
 				DrawSprite(starEntity->position, starEntity->size, starEntity->sprite);
 			}
-			
 		}
 	}
 
@@ -258,7 +270,15 @@ void MyGameUpdate() {
 		EntityHandle playerHandle = playerEntitiesInBuffer[i].handle;
 		Player* playerEntity = (Player*)GetEntity(&Data->em, playerHandle);
 		if (playerEntity != NULL) {
-			DrawSprite(playerEntity->position, playerEntity->size, playerEntity->sprite);
+			if (playerEntity->toDelete) {
+				Data->playerGameOverPosition = playerEntity->position;
+				DeleteEntity(&Data->em, playerEntity->handle);
+				// Trigger player explosion
+				
+			}
+			else {
+				DrawSprite(playerEntity->position, playerEntity->size, playerEntity->sprite);
+			}
 		}
 	}
 	//		Enemy Redner
@@ -288,7 +308,8 @@ void MyGameUpdate() {
 			}
 		}
 	} 
-
+	
+	//		Player Charging Laser Render & Delete
 	if (playerEntitiesInBuffer[0].chargingLaser) {
 		for (int i = 0; i < playerLaserChargeBuffer->count; i++) {
 			EntityHandle playerLaserChargeHandle = playerLaserChargeEntitiesInBuffer[i].handle;
@@ -336,4 +357,23 @@ void MyGameUpdate() {
 
 	DrawTextScreenPixel(&Game->monoFont, V2(30,50), 13.0f, RGB(0.8f, 0.1f, 0.1f), "Kill Count: %d", Data->killCount);
 	
+
+	if (Data->gameOver) {
+
+		DrawSprite(Data->playerGameOverPosition, V2(0.65f, 0.65f), &Data->playerExplosion);
+
+		Data->gameOverTimer += Game->deltaTime;
+		DrawTextScreenPixel(&Game->monoFont, V2(540, 700), 20.0f, RGB(0.1f, 0.7f, 0.1f), "Press Return to Start Over");
+		if (Data->gameOverTimer < 1) {
+			DrawTextScreenPixel(&Game->monoFont, V2(160, 500), 140.0f, RGB(0.99f, 0.1f, 0.1f), "GAME OVER");
+		}
+		else if (Data->gameOverTimer > 2) {
+			Data->gameOverTimer = 0;	
+		}
+
+		if (InputPressed(Input, Input_Return)) {
+			Data->gameOver = false;
+			MyInit();
+		}
+	}
 }

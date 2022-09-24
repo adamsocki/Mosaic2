@@ -124,6 +124,10 @@ struct LevelManager {
 
 struct MyData {
 
+	bool gameOver;
+	real32 gameOverTimer;
+	vec2 playerGameOverPosition;
+
 	EntityManager em;
 
 	Sprite playerSprite;
@@ -145,6 +149,8 @@ struct MyData {
 	Sprite starSprite;
 
 	Sprite enemyBulletSprite;
+
+	Sprite playerExplosion;
 
 	LevelManager lm;
 
