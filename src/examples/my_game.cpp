@@ -34,7 +34,6 @@ void MyInit() {
 
 void MyGameUpdate() {
 
-
 	// LOGIC
 	//		Level Logic
 	Data->lm.spawnEnemyTimer += Game->deltaTime;
@@ -52,6 +51,7 @@ void MyGameUpdate() {
 	EntityTypeBuffer* playerLaserChargeBuffer = &Data->em.buffers[EntityType_PlayerLaserCharge];
 	EntityTypeBuffer* playerLaserShotBuffer = &Data->em.buffers[EntityType_PlayerLaserShot];
 	EntityTypeBuffer* baseBuffer = &Data->em.buffers[EntityType_Base];
+	EntityTypeBuffer* enemyBulletBuffer = &Data->em.buffers[EntityType_EnemyBullet];
 
 	//		Point to EntityBuffer->entities
 	Player* playerEntitiesInBuffer = (Player*)playerBuffer->entities;
@@ -61,6 +61,7 @@ void MyGameUpdate() {
 	PlayerLaserCharge* playerLaserChargeEntitiesInBuffer = (PlayerLaserCharge*)playerLaserChargeBuffer->entities;
 	PlayerLaserShot* playerLaserShotEntitiesInBuffer = (PlayerLaserShot*)playerLaserShotBuffer->entities;
 	Base* baseEntitiesInBuffer = (Base*)baseBuffer->entities;
+	EnemyBullet* enemyBulletEntitiesInBuffer = (EnemyBullet*)enemyBulletBuffer->entities;
 
 	//		Input Logic
 	InputPlayerController(&playerEntitiesInBuffer[0]);
@@ -75,6 +76,7 @@ void MyGameUpdate() {
 			enemyEntity->size = V2(0.2f, 0.2f);
 			enemyEntity->handle = enemyHandle;
 			enemyEntity->toDelete = false;
+			enemyEntity->bulletTimer = 0;
 			enemyEntity->speed = V2(RandfRange(-3, -0.5f), 0);
 			int32 random = RandiRange(1, 8);
 			if (random == 1) {
@@ -113,6 +115,31 @@ void MyGameUpdate() {
 		if (enemyEntity != NULL) {
 			enemyEntity->position.x += enemyEntity->speed.x * Game->deltaTime;
 			enemyEntity->lifetime += Game->deltaTime;
+			enemyEntity->bulletTimer += Game->deltaTime;
+			if (enemyEntity->bulletTimer > RandiRange(2, 5)) {
+				EntityHandle enemyBulletHandle = AddEntity(&Data->em, EntityType_EnemyBullet);
+				EnemyBullet* enemyBulletEntity = (EnemyBullet*)GetEntity(&Data->em, enemyBulletHandle);
+				enemyBulletEntity->position = enemyEntity->position;
+				enemyBulletEntity->speed = V2(RandfRange(-3, -0.3f), RandfRange(-2,2));
+				enemyBulletEntity->lifetime = 0;
+				enemyBulletEntity->size = V2(0.1f, 0.1f);
+				enemyBulletEntity->toDelete = false;
+				enemyBulletEntity->handle = enemyBulletHandle;
+				enemyBulletEntity->sprite = &Data->enemyBulletSprite;
+				enemyEntity->bulletTimer = 0;
+			}
+		}
+	}
+
+	//		Move EnemyBullets
+	for (int i = 0; i < enemyBulletBuffer->count; i++) {
+		EntityHandle enemyBulletHandle = enemyBulletEntitiesInBuffer[i].handle;
+		EnemyBullet* enemyBulletEntity = (EnemyBullet*)GetEntity(&Data->em, enemyBulletHandle);
+		enemyBulletEntity->position.x += enemyBulletEntity->speed.x * Game->deltaTime;
+		enemyBulletEntity->position.y += enemyBulletEntity->speed.y * Game->deltaTime;
+		enemyBulletEntity->lifetime += Game->deltaTime;
+		if (enemyBulletEntity->lifetime > 3) {
+			enemyBulletEntity->toDelete = true;
 		}
 	}
 
@@ -290,6 +317,19 @@ void MyGameUpdate() {
 					DrawSprite(playerLaserShotEntity->position, playerLaserShotEntity->size, playerLaserShotEntity->sprite);
 				}
 				
+			}
+		}
+	}
+
+	// render enemy Bullets
+	for (int i = 0; i < enemyBulletBuffer->count; i++) {
+		EnemyBullet* enemyBulletEntity = (EnemyBullet*)GetEntity(&Data->em, enemyBulletEntitiesInBuffer[i].handle);
+		if (enemyBulletEntity != NULL) {
+			if (enemyBulletEntity->toDelete) {
+				DeleteEntity(&Data->em, enemyBulletEntity->handle);
+			}
+			else {
+				DrawSprite(enemyBulletEntity->position, enemyBulletEntity->size, enemyBulletEntity->sprite);
 			}
 		}
 	}

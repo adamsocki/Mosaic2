@@ -9,6 +9,8 @@ void LoadSprites() {
 	LoadSprite(&Data->playerLaserChargeSprite, "data/laserBall.png");
 	LoadSprite(&Data->playerLaserShotSprite, "data/laserBullet.png");
 
+	LoadSprite(&Data->enemyBulletSprite, "data/enemyBullet.png");
+
 	LoadSprite(&Data->enemySprite1, "data/GalacticaRanger/Galactica_Ranger_01.png");
 	LoadSprite(&Data->enemySprite2, "data/GalacticaRanger/Galactica_Ranger_02.png");
 	LoadSprite(&Data->enemySprite3, "data/GalacticaRanger/Galactica_Ranger_03.png");

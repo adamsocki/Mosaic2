@@ -7,6 +7,7 @@ enum EntityType {
 	EntityType_Enemy,
 
 	EntityType_PlayerBullet,
+
 	EntityType_EnemyBullet,
 
 	EntityType_PlayerLaserCharge,
@@ -84,17 +85,19 @@ struct PlayerBullet : Entity {
 
 };
 
+struct EnemyBullet : Entity {
+	real32 lifetime;
+	vec2 speed;
+};
+
 
 struct Enemy : Entity {
 	vec2 speed;
 	real32 lifetime;
+	real32 bulletTimer;
 };
 
 struct Star : Entity {
-	vec2 speed;
-};
-
-struct EnemyBullet : Entity {
 	vec2 speed;
 };
 
@@ -140,6 +143,8 @@ struct MyData {
 	Sprite enemySprite8;
 
 	Sprite starSprite;
+
+	Sprite enemyBulletSprite;
 
 	LevelManager lm;
 

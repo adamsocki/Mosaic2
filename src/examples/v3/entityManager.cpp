@@ -71,6 +71,15 @@ void DeleteEntity(EntityManager* em, EntityHandle handle) {
 		EntityInfo* infoOfSwappedEntity = &em->entities[handleOfSwappedEntity.idLocationInsideInfo];
 		infoOfSwappedEntity->indexInBuffer = info->indexInBuffer;
 	}
+	if (handle.type == EntityType_EnemyBullet) {
+		EnemyBullet* enemyBulletEntity = (EnemyBullet*)buffer->entities;
+
+		enemyBulletEntity[info->indexInBuffer] = enemyBulletEntity[buffer->count - 1];
+		handleOfSwappedEntity = enemyBulletEntity[buffer->count - 1].handle;
+
+		EntityInfo* infoOfSwappedEntity = &em->entities[handleOfSwappedEntity.idLocationInsideInfo];
+		infoOfSwappedEntity->indexInBuffer = info->indexInBuffer;
+	}
 	buffer->count--;
 }
 
@@ -146,13 +155,6 @@ void InitializeEntityBuffers() {
 	starBuffer->count = 0;
 	starBuffer->entities = (Star*)malloc(starBuffer->capacity * starBuffer->sizeInBytes);
 
-	// enemyBuffer
-	EntityTypeBuffer* enemyBulletBuffer = &Data->em.buffers[EntityType_EnemyBullet];
-	enemyBulletBuffer->capacity = 500;
-	enemyBulletBuffer->sizeInBytes = sizeof(EnemyBullet);
-	enemyBulletBuffer->count = 0;
-	enemyBulletBuffer->entities = (EnemyBullet*)malloc(enemyBulletBuffer->capacity * enemyBulletBuffer->sizeInBytes);
-
 	// PlayerLaserChargeBuffer
 	EntityTypeBuffer* playerLaserChargeBuffer = &Data->em.buffers[EntityType_PlayerLaserCharge];
 	playerLaserChargeBuffer->capacity = 100;
@@ -173,6 +175,13 @@ void InitializeEntityBuffers() {
 	baseBuffer->sizeInBytes = sizeof(PlayerLaserShot);
 	baseBuffer->count = 0;
 	baseBuffer->entities = (PlayerLaserShot*)malloc(baseBuffer->capacity * baseBuffer->sizeInBytes);
+
+	// EnemyBulletBuffer
+	EntityTypeBuffer* enemyBulletBuffer = &Data->em.buffers[EntityType_EnemyBullet];
+	enemyBulletBuffer->capacity = 400;
+	enemyBulletBuffer->sizeInBytes = sizeof(EnemyBullet);
+	enemyBulletBuffer->count = 0;
+	enemyBulletBuffer->entities = (EnemyBullet*)malloc(enemyBulletBuffer->capacity * enemyBulletBuffer->sizeInBytes);
 }
 
 void CreateBase() {
@@ -198,7 +207,6 @@ void InitializeEntityManager() {
 	Data->em.nextID = 0;
 
 }
-
 
 void CreateStars(int32 numberToCreate, bool playingGame) {
 	
